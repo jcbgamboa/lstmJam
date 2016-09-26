@@ -16,11 +16,14 @@ class Network(object):
       layers.append(Cell(prev_cell.state_next, prev_cell.h_next, first=False))
       prev_cell = layers[-1]
 
-    w_last = tf.Variable(tf.truncated_normal(n_output, layers[-1].h_next.shape[0]))
-    b_last = tf.Variable(tf.constant(0.1,shape=n_output))
+    w_last = tf.Variable(tf.truncated_normal(
+                              [n_output,
+                              layers[-1].h_next.get_shape().as_list()[0]]))
+    b_last = tf.Variable(tf.constant(0.1,shape=[n_output,1]))
 
     with tf.name_scope('Model'):
       self.pred = tf.matmul(w_last, layers[-1].h_next) + b_last
+    return
 
   def initialize_cell_state(self, n_s, n_h):
     return tf.Variable(tf.constant(0.1,shape=[n_s, 1])),\
