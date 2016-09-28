@@ -4,19 +4,19 @@ from tensorflow.examples.tutorials.mnist import input_data
 import os
 
 
-tf.app.flags.DEFINE_float("learning_rate", 0.001, "Learning rate.")
+tf.app.flags.DEFINE_float("learning_rate", 0.01, "Learning rate.")
 tf.app.flags.DEFINE_integer("batch_size", 1,
                             "Batch size to use during training.")
-tf.app.flags.DEFINE_integer("size", 256, "Size of each model layer.")
-tf.app.flags.DEFINE_integer("n_layers", 3, "Number of layers in the model.")
+tf.app.flags.DEFINE_integer("size", 500, "Size of each model layer.")
+tf.app.flags.DEFINE_integer("n_layers", 10, "Number of layers in the model.")
 tf.app.flags.DEFINE_string("train_dir", "/tmp", "Training directory.")
-tf.app.flags.DEFINE_integer("steps_per_checkpoint", 1000,
+tf.app.flags.DEFINE_integer("steps_per_checkpoint", 50,
                             "How many training steps to do per checkpoint.")
 tf.app.flags.DEFINE_boolean("self_test", False,
                             "Run a self-test if this is set to True.")
 tf.app.flags.DEFINE_boolean("train", False,
                             "Run a train if this is set to True.")
-tf.app.flags.DEFINE_integer("n_epochs", 10,
+tf.app.flags.DEFINE_integer("n_epochs", 1,
                             "Number of training iterations.")
 tf.app.flags.DEFINE_string("log_dir", "/tmp",
                             "Tensorboard log directory.")
@@ -32,7 +32,8 @@ def create_model(sess, n_input, n_output):
 
   # Define loss and optimizer
   with tf.name_scope('Loss'):
-    cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(net.pred, output))
+    #cost = tf.nn.l2_loss(tf.sub(tf.transpose(net.pred), output))
+    cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(tf.transpose(net.pred), output))
 
   with tf.name_scope('SGD'):
     optimizer = tf.train.AdamOptimizer(learning_rate=FLAGS.learning_rate).minimize(cost)
@@ -60,7 +61,7 @@ def create_model(sess, n_input, n_output):
     print("Created model with fresh parameters.")
     sess.run(tf.initialize_all_variables())
 
-  return input, output, optimizer, cost, merged_summary_op, accuracy, saver
+  return input, output, optimizer, cost, merged_summary_op, accuracy, saver, net
 
 def train():
   mnist = input_data.read_data_sets(FLAGS.data_dir, one_hot=True)
@@ -100,7 +101,7 @@ def train():
   # Launch the graph
   with tf.Session() as sess:
       #sess.run(init)
-      input, output, optimizer, cost, merged_summary_op, accuracy, saver = create_model(sess, n_input, n_output)
+      input, output, optimizer, cost, merged_summary_op, accuracy, saver, net = create_model(sess, n_input, n_output)
 
       # op to write logs to Tensorboard
       summary_writer = tf.train.SummaryWriter(FLAGS.log_dir, graph=tf.get_default_graph())
@@ -124,18 +125,19 @@ def train():
               batch_xs, batch_ys = mnist.train.next_batch(FLAGS.batch_size)
               # Run optimization op (backprop), cost op (to get loss value)
               # and summary nodes
-              _, c, summary = sess.run([optimizer, cost, merged_summary_op],
+              _, c, summary,pred_check = sess.run([optimizer, cost, merged_summary_op,net.pred],
                                        feed_dict={input: batch_xs, output: batch_ys})
               # Write logs at every iteration
               summary_writer.add_summary(summary, epoch * total_batch + i)
               # Compute average loss
               avg_cost += c / total_batch
 
+
               # Display logs per epoch step
               if (i+1) % FLAGS.steps_per_checkpoint == 0:
-                  print "Epoch:", '%04d' % (epoch+1), "cost=", "{:.9f}".format(avg_cost)
-                  checkpoint_path = os.path.join(FLAGS.train_dir, "transliterate.ckpt")
-                  saver.save(sess, checkpoint_path, global_step=epoch*total_batch + i)
+                  print "Epoch:", '%04d' % (epoch+1), "cost=", "{:.9f}".format(c),"iter= " + str(i)
+                  #checkpoint_path = os.path.join(FLAGS.train_dir, "transliterate.ckpt")
+                  #saver.save(sess, checkpoint_path, global_step=epoch*total_batch + i)
 
       print "Optimization Finished!"
 
