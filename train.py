@@ -38,7 +38,7 @@ def create_model(sess, n_input, n_output):
                                     tf.transpose(net.pred), output))
 
   with tf.name_scope('SGD'):
-    optimizer = tf.train.AdamOptimizer(learning_rate=FLAGS.learning_rate).
+    optimizer = tf.train.AdamOptimizer(learning_rate=FLAGS.learning_rate).\
                                     minimize(cost)
 
   # Evaluate model
@@ -144,24 +144,24 @@ def train():
 
               # Display logs per epoch step
               if (i+1) % FLAGS.steps_per_checkpoint == 0:
-                  print "Epoch:", '%04d' % (epoch+1),
-                        "cost=", "{:.9f}".format(c),
-                        "iter= " + str(i)
+                  print("Epoch:", '%04d' % (epoch+1),\
+                        "cost=", "{:.9f}".format(c),\
+                        "iter= " + str(i))
                   #checkpoint_path = os.path.join(FLAGS.train_dir,
                   #                               "transliterate.ckpt")
                   #saver.save(sess, checkpoint_path,
                   #           global_step=epoch*total_batch + i)
 
-      print "Optimization Finished!"
+      print("Optimization Finished!")
 
       # Test model
       # Calculate accuracy
-      print "Accuracy:",
-            accuracy.eval({input: mnist.test.images, output: mnist.test.labels})
+      print("Accuracy:",\
+            accuracy.eval({input: mnist.test.images, output: mnist.test.labels}))
 
-      print "Run the command line:\n" \
+      print( "Run the command line:\n" \
             "--> tensorboard --logdir=/tmp/tensorflow_logs " \
-            "\nThen open http://0.0.0.0:6006/ into your web browser"
+            "\nThen open http://0.0.0.0:6006/ into your web browser")
 
 def self_test():
   return
