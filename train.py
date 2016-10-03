@@ -28,15 +28,18 @@ def create_model(sess, n_input, n_output):
 
   input = tf.placeholder("float", [FLAGS.batch_size, n_input])
   output = tf.placeholder("float", [FLAGS.batch_size, n_output])
-  net = Network(FLAGS.n_layers, FLAGS.size, FLAGS.size, n_input, n_output, input, output)
+  net = Network(FLAGS.n_layers, FLAGS.size, FLAGS.size, n_input, n_output,
+                input, output)
 
   # Define loss and optimizer
   with tf.name_scope('Loss'):
     #cost = tf.nn.l2_loss(tf.sub(tf.transpose(net.pred), output))
-    cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(tf.transpose(net.pred), output))
+    cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
+                                    tf.transpose(net.pred), output))
 
   with tf.name_scope('SGD'):
-    optimizer = tf.train.AdamOptimizer(learning_rate=FLAGS.learning_rate).minimize(cost)
+    optimizer = tf.train.AdamOptimizer(learning_rate=FLAGS.learning_rate).
+                                    minimize(cost)
 
   # Evaluate model
   with tf.name_scope('Accuracy'):
@@ -74,14 +77,17 @@ def train():
 
   input = tf.placeholder("float", [FLAGS.batch_size, n_input])
   output = tf.placeholder("float", [FLAGS.batch_size, n_output])
-  net = Network(FLAGS.n_layers, FLAGS.size, FLAGS.size, n_input, n_output, input, output)
+  net = Network(FLAGS.n_layers, FLAGS.size, FLAGS.size, n_input, n_output,
+                input, output)
 
   # Define loss and optimizer
   with tf.name_scope('Loss'):
-    cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(net.pred, output))
+    cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
+                                    net.pred, output))
 
   with tf.name_scope('SGD'):
-    optimizer = tf.train.AdamOptimizer(learning_rate=FLAGS.learning_rate).minimize(cost)
+    optimizer = tf.train.AdamOptimizer(learning_rate=FLAGS.learning_rate).
+                                    minimize(cost)
 
   # Evaluate model
   with tf.name_scope('Accuracy'):
@@ -101,17 +107,19 @@ def train():
   # Launch the graph
   with tf.Session() as sess:
       #sess.run(init)
-      input, output, optimizer, cost, merged_summary_op, accuracy, saver, net = create_model(sess, n_input, n_output)
+      input, output, optimizer, cost, merged_summary_op, accuracy, saver, net =\
+                                          create_model(sess, n_input, n_output)
 
       # op to write logs to Tensorboard
-      summary_writer = tf.train.SummaryWriter(FLAGS.log_dir, graph=tf.get_default_graph())
+      summary_writer = tf.train.SummaryWriter(FLAGS.log_dir,
+                                              graph=tf.get_default_graph())
 
       avg_cost = 0.
       '''
       for i in range(FLAGS.n_epochs):
         batch_xs, batch_ys = mnist.train.next_batch(FLAGS.batch_size)
         _, loss, summary = sess.run([optimizer, cost, merged_summary_op],
-                                       feed_dict={input: batch_xs, output: batch_ys})
+                                 feed_dict={input: batch_xs, output: batch_ys})
         summary_writer.add_summary(summary, i )
         avg_cost += loss / FLAGS.n_iter
           # Loop over all batches
@@ -125,8 +133,9 @@ def train():
               batch_xs, batch_ys = mnist.train.next_batch(FLAGS.batch_size)
               # Run optimization op (backprop), cost op (to get loss value)
               # and summary nodes
-              _, c, summary,pred_check = sess.run([optimizer, cost, merged_summary_op,net.pred],
-                                       feed_dict={input: batch_xs, output: batch_ys})
+              _, c, summary,pred_check = sess.run(
+                                [optimizer, cost, merged_summary_op,net.pred],
+                                feed_dict={input: batch_xs, output: batch_ys})
               # Write logs at every iteration
               summary_writer.add_summary(summary, epoch * total_batch + i)
               # Compute average loss
@@ -135,15 +144,20 @@ def train():
 
               # Display logs per epoch step
               if (i+1) % FLAGS.steps_per_checkpoint == 0:
-                  print "Epoch:", '%04d' % (epoch+1), "cost=", "{:.9f}".format(c),"iter= " + str(i)
-                  #checkpoint_path = os.path.join(FLAGS.train_dir, "transliterate.ckpt")
-                  #saver.save(sess, checkpoint_path, global_step=epoch*total_batch + i)
+                  print "Epoch:", '%04d' % (epoch+1),
+                        "cost=", "{:.9f}".format(c),
+                        "iter= " + str(i)
+                  #checkpoint_path = os.path.join(FLAGS.train_dir,
+                  #                               "transliterate.ckpt")
+                  #saver.save(sess, checkpoint_path,
+                  #           global_step=epoch*total_batch + i)
 
       print "Optimization Finished!"
 
       # Test model
       # Calculate accuracy
-      print "Accuracy:", accuracy.eval({input: mnist.test.images, output: mnist.test.labels})
+      print "Accuracy:",
+            accuracy.eval({input: mnist.test.images, output: mnist.test.labels})
 
       print "Run the command line:\n" \
             "--> tensorboard --logdir=/tmp/tensorflow_logs " \
@@ -160,3 +174,4 @@ def main(_):
 
 if __name__ == '__main__':
   tf.app.run()
+
