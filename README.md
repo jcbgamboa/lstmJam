@@ -42,13 +42,14 @@ We have tested the code in the following two environments:
 
 ### Experiment 1
 
-Number of layers:
-Use tied weights:
-Use batch normalization:
-Type of weight initialization:
-How-many-folds cross-validation:
-Size of state cell:
-Size of output cell: (can this be different from the size of the state cell?)
+* Number of layers:
+* Use tied weights:
+* Use batch normalization:
+* Type of weight initialization:
+* How-many-folds cross-validation:
+* Size of state cell:
+* Size of output cell: (can this be different from the size of the
+	state cell?)
 
 ### Experiment 2
 
