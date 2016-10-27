@@ -1,52 +1,6 @@
-import math
 import numpy as np
 import tensorflow as tf
 from tensorflow.python.ops.rnn_cell import RNNCell
-from tensorflow.python.ops import math_ops
-from tensorflow.python.ops import variable_scope as vs
-from tensorflow.python.ops import init_ops
-from tensorflow.python.ops import array_ops
-from tensorflow.python.util import nest
-
-class LSTMCell(RNNCell):
-    '''Vanilla LSTM implemented with same initializations as BN-LSTM'''
-    def __init__(self, num_units):
-        self.num_units = num_units
-
-    @property
-    def state_size(self):
-        return (self.num_units, self.num_units)
-
-    @property
-    def output_size(self):
-        return self.num_units
-
-    def __call__(self, x, state, scope=None):
-        with tf.variable_scope(scope or type(self).__name__):
-            c, h = state
-
-            # Keep W_xh and W_hh separate here as well to reuse initialization methods
-            x_size = x.get_shape().as_list()[1]
-            W_xh = tf.get_variable('W_xh',
-                [x_size, 4 * self.num_units],
-                initializer=orthogonal_initializer())
-            W_hh = tf.get_variable('W_hh',
-                [self.num_units, 4 * self.num_units],
-                initializer=bn_lstm_identity_initializer(0.95))
-            bias = tf.get_variable('bias', [4 * self.num_units])
-
-            # hidden = tf.matmul(x, W_xh) + tf.matmul(h, W_hh) + bias
-            # improve speed by concat.
-            concat = tf.concat(1, [x, h])
-            W_both = tf.concat(0, [W_xh, W_hh])
-            hidden = tf.matmul(concat, W_both) + bias
-
-            i, j, f, o = tf.split(1, 4, hidden)
-
-            new_c = c * tf.sigmoid(f) + tf.sigmoid(i) * tf.tanh(j)
-            new_h = tf.tanh(new_c) * tf.sigmoid(o)
-
-            return new_h, (new_c, new_h)
 
 class BNLSTMCell(RNNCell):
     '''Batch normalized LSTM as described in arxiv.org/abs/1603.09025'''
@@ -67,21 +21,21 @@ class BNLSTMCell(RNNCell):
 
         x_size = x.get_shape().as_list()[1]
 
-        W_xh = tf.get_variable('W_xh_{}'.format(id),
+        self.W_xh = tf.get_variable('W_xh_{}'.format(id),
             [x_size, 4 * self.num_units],
             initializer=orthogonal_initializer())
-        W_hh = tf.get_variable('W_hh_{}'.format(id),
+        self.W_hh = tf.get_variable('W_hh_{}'.format(id),
             [self.num_units, 4 * self.num_units],
             initializer=bn_lstm_identity_initializer(0.95))
         bias = tf.get_variable('bias_{}'.format(id), [4 * self.num_units])
 
-        xh = tf.matmul(x, W_xh)
+        xh = tf.matmul(x, self.W_xh)
         bn_xh = batch_norm(xh, 'xh_{}'.format(id), self.training)
 
         hh = None
         bn_hh = None
         if not first:
-            hh = tf.matmul(h, W_hh)
+            hh = tf.matmul(h, self.W_hh)
             bn_hh = batch_norm(hh, 'hh_{}'.format(id), self.training)
 
         hidden = bn_xh + bias
