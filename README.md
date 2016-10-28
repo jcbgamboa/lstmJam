@@ -1,8 +1,6 @@
 ![alt tag](https://sigvoiced.files.wordpress.com/2016/07/tlstm_full.png)
 -----------------
 
-# LstmJam
-
 This project has the goal of experimenting with an unfolded version
 of LSTMs.
 
