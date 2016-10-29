@@ -16,7 +16,7 @@ class BNLSTMCell(RNNCell):
     def output_size(self):
         return self.num_units
 
-    def __call__(self, x, state, id, scope=None, first=True):
+    def __call__(self, x, state, keep_prob, id, scope=None, first=True):
         c, h = state
 
         x_size = x.get_shape().as_list()[1]
@@ -48,6 +48,10 @@ class BNLSTMCell(RNNCell):
         bn_new_c = batch_norm(new_c, 'c_{}'.format(id), self.training)
 
         new_h = tf.tanh(bn_new_c) * tf.sigmoid(o)
+
+	# Adds Dropout
+        new_h = tf.nn.dropout(new_h, keep_prob)
+
         self.new_h = new_h
         self.state = (new_c, new_h)
         return new_h, (new_c, new_h)

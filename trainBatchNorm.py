@@ -6,6 +6,10 @@ from lstm import BNLSTMCell, orthogonal_initializer
 from tensorflow.examples.tutorials.mnist import input_data
 
 tf.app.flags.DEFINE_float("learning_rate", 0.01, "Learning rate.")
+tf.app.flags.DEFINE_float("dropout", 0.5,
+                            "For Dropout: how much to keep when using dropout?")
+tf.app.flags.DEFINE_float("clipping", 1.0,
+                            "Maximum absolute value of the gradients.")
 tf.app.flags.DEFINE_integer("batch_size", 128,
                             "Batch size to use during training.")
 tf.app.flags.DEFINE_integer("size", 128, "Size of each model layer.")
@@ -29,22 +33,22 @@ def data_prep():
   mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
   return mnist
 
-def create_model(input_size,output_size,batch_size=128,hidden_size=128,n_layers=10):
-  #batch_size = 128
-  #hidden_size = 128
-  #n_layers = 10
+def create_model(input_size, output_size,
+		batch_size = 128, hidden_size = 128, n_layers = 10,
+		clipping = 1.0):
 
   x = tf.placeholder(tf.float32, [None, input_size])
   training = tf.placeholder(tf.bool)
 
-  #c, h
+  keep_prob = tf.placeholder(tf.float32)
+
   initialState = (tf.random_normal([batch_size, hidden_size], stddev=0.1),
       tf.random_normal([batch_size, hidden_size], stddev=0.1))
 
   list_layers = []
   id = 1
   cell_1 = BNLSTMCell(hidden_size, training=training)
-  new_h, new_state = cell_1(x, initialState, id, first=True)
+  new_h, new_state = cell_1(x, initialState, keep_prob, id, first=True)
 
   layers = [cell_1]
   prev_cell = cell_1
@@ -52,7 +56,8 @@ def create_model(input_size,output_size,batch_size=128,hidden_size=128,n_layers=
   for l in range(1, (n_layers-1)):
     id += 1
     next_cell = BNLSTMCell(hidden_size, training=training)
-    next_new_h, next_new_state = next_cell(prev_cell.new_h, prev_cell.state, id, first=True)
+    next_new_h, next_new_state = next_cell(prev_cell.new_h, prev_cell.state,
+					keep_prob, id, first=True)
     layers.append(next_cell)
     prev_cell = layers[-1]
 
@@ -60,7 +65,8 @@ def create_model(input_size,output_size,batch_size=128,hidden_size=128,n_layers=
 
   _, final_hidden = state
 
-  W = tf.get_variable('W', [hidden_size, output_size], initializer=orthogonal_initializer())
+  W = tf.get_variable('W', [hidden_size, output_size],
+			initializer=orthogonal_initializer())
   b = tf.get_variable('b', [output_size])
 
   y = tf.nn.softmax(tf.matmul(final_hidden, W) + b)
@@ -71,7 +77,9 @@ def create_model(input_size,output_size,batch_size=128,hidden_size=128,n_layers=
 
   optimizer = tf.train.AdamOptimizer(learning_rate=FLAGS.learning_rate)
   gvs = optimizer.compute_gradients(cross_entropy)
-  capped_gvs = [(None if grad is None else tf.clip_by_value(grad, -1., 1.), var) for grad, var in gvs]
+  capped_gvs = [(None if grad is None
+			else tf.clip_by_value(grad, -1.*clipping, clipping), var)
+			for grad, var in gvs]
   train_step = optimizer.apply_gradients(capped_gvs)
 
   correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
@@ -101,7 +109,7 @@ def create_model(input_size,output_size,batch_size=128,hidden_size=128,n_layers=
     tf.image_summary("layer_{}_w_o".format(k), w_o)
 
   merged = tf.merge_all_summaries()
-  return merged, train_step, cross_entropy, x, y_, training, accuracy
+  return merged, train_step, cross_entropy, x, y_, training, accuracy, keep_prob
 
 def load_model(saver,sess,chkpnts_dir):
   ckpt = tf.train.get_checkpoint_state(chkpnts_dir)
@@ -115,11 +123,13 @@ def load_model(saver,sess,chkpnts_dir):
 def train():
   mnist = data_prep()
 
-  merged, train_step, cross_entropy, x, y_, training, accuracy = create_model(784,
-                                                                    10,
-                                                                    FLAGS.batch_size,
-                                                                    FLAGS.size,
-                                                                    FLAGS.n_layers)
+  merged, train_step, cross_entropy, x, y_, \
+		training, accuracy, keep_prob = create_model(784,
+							    10,
+							    FLAGS.batch_size,
+							    FLAGS.size,
+							    FLAGS.n_layers,
+							    FLAGS.clipping)
 
   saver = tf.train.Saver(tf.all_variables())
   sess = tf.Session()
@@ -140,12 +150,16 @@ def train():
 
   for i in range(FLAGS.n_itr):
       batch_xs, batch_ys = mnist.train.next_batch(FLAGS.batch_size)
-      loss, _ = sess.run([cross_entropy, train_step], feed_dict={x: batch_xs, y_: batch_ys, training: True})
+      loss, _ = sess.run([cross_entropy, train_step],
+			feed_dict={x: batch_xs, y_: batch_ys,
+				training: True, keep_prob: FLAGS.dropout})
       step_time = time.time() - current_time
       current_time = time.time()
       if i % FLAGS.steps_per_checkpoint == 0:
         batch_xs, batch_ys = mnist.validation.next_batch(FLAGS.batch_size)
-        summary_str = sess.run(merged, feed_dict={x: batch_xs, y_: batch_ys, training: False})
+        summary_str = sess.run(merged,
+				feed_dict={x: batch_xs, y_: batch_ys,
+					training: False, keep_prob: FLAGS.dropout})
         writer.add_summary(summary_str, i)
         checkpoint_path = os.path.join("chkpnts/", "lstmjam.ckpt")
         saver.save(sess, checkpoint_path, global_step=i)
@@ -153,7 +167,9 @@ def train():
         avg_acc = 0.0
         for test_itr in range(70):
           test_data, test_label = mnist.test.next_batch(FLAGS.batch_size)
-          acc = sess.run(accuracy, feed_dict={x: test_data, y_: test_label, training: False})
+          acc = sess.run(accuracy,
+			feed_dict={x: test_data, y_: test_label,
+				training: False, keep_prob: FLAGS.dropout})
           avg_acc += acc
           #test_label = mnist.test.labels[:FLAGS.batch_size]
         print("Testing Accuracy:" + str(avg_acc/70))
@@ -161,11 +177,13 @@ def train():
 def test():
   mnist = data_prep()
 
-  merged, train_step, cross_entropy, x, y_, training, accuracy = create_model(784,
-                                                                    10,
-                                                                    FLAGS.batch_size,
-                                                                    FLAGS.size,
-                                                                    FLAGS.n_layers)
+  merged, train_step, cross_entropy, x, y_, \
+		training, accuracy, keep_prob = create_model(784,
+							    10,
+							    FLAGS.batch_size,
+							    FLAGS.size,
+							    FLAGS.n_layers,
+							    FLAGS.clipping)
 
   saver = tf.train.Saver(tf.all_variables())
   sess = tf.Session()
