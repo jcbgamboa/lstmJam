@@ -29,11 +29,11 @@ def data_prep():
   mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
   return mnist
 
-def create_model(input_size,output_size,batch_size=128,hidden_size=128,n_layers=10):
+def create_model(input_size,output_size,batch_size=128,hidden_size=128,n_layers=10,):
   #batch_size = 128
   #hidden_size = 128
   #n_layers = 10
-
+  
   x = tf.placeholder(tf.float32, [None, input_size])
   training = tf.placeholder(tf.bool)
 
