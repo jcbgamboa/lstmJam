@@ -123,6 +123,9 @@ def train():
 
   saver = tf.train.Saver(tf.all_variables())
   sess = tf.Session()
+  checkpoints_folder = './chkpnts/'
+  if not os.path.exists(checkpoints_folder):
+    os.makedirs(checkpoints_folder)
   load_model(saver, sess, "chkpnts/")
   #init = tf.initialize_all_variables()
   #sess.run(init)
