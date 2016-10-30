@@ -21,6 +21,8 @@ tf.app.flags.DEFINE_boolean("self_test", False,
 	"Run a self-test if this is set to True.")
 tf.app.flags.DEFINE_boolean("train", True,
 	"Run a train if this is set to True.")
+tf.app.flags.DEFINE_boolean("tie_weights", False,
+	"Use the same weights in all layers if set true.")
 tf.app.flags.DEFINE_integer("n_itr", 100000,
 	"Number of training iterations.")
 tf.app.flags.DEFINE_string("log_dir", "/tmp",
@@ -37,7 +39,7 @@ def data_prep():
 
 def create_model(input_size, output_size,
 		 batch_size=128, hidden_size=128, n_layers=10,
-		 clipping=1.0):
+		 clipping=1.0, tie_weights=False):
 	x = tf.placeholder(tf.float32, [None, input_size])
 	training = tf.placeholder(tf.bool)
 
@@ -55,16 +57,23 @@ def create_model(input_size, output_size,
 
 	layers = [cell_1]
 	prev_cell = cell_1
-
+	prev_cell_w = prev_cell.W_hh
+	prev_cell_b = prev_cell.bias
 	for l in range(1, (n_layers - 1)):
+		if not tie_weights:
+			prev_cell_w = None
+			prev_cell_b = None
 		id += 1
 		next_cell = BNLSTMCell(hidden_size, training=training)
 		next_new_h, next_new_state = next_cell(prev_cell.new_h,
 			prev_cell.state,
 			keep_prob, id,
-			first=True)
+			first=False,
+			tied_weights=prev_cell_w,
+			tied_bias=prev_cell_b)
 		layers.append(next_cell)
 		prev_cell = layers[-1]
+		prev_cell_w = prev_cell.W_xh
 
 	outputs, state = layers, prev_cell.state
 
@@ -104,30 +113,35 @@ def create_model(input_size, output_size,
 				tf.nn.zero_fraction(grad - capped_grad))
 			tf.histogram_summary('weight/{}'.format(var.name), var)
 
-	for k, layer in enumerate(outputs):
-		w_i, w_j, w_f, w_o = tf.split(1, 4, layer.W_xh)
 
-		w_i = tf.reshape(w_i, (
-			1, w_i.get_shape().as_list()[0],
-			w_i.get_shape().as_list()[1],
-			1))
-		w_j = tf.reshape(w_j, (
-			1, w_j.get_shape().as_list()[0],
-			w_j.get_shape().as_list()[1],
-			1))
-		w_f = tf.reshape(w_f, (
-			1, w_f.get_shape().as_list()[0],
-			w_f.get_shape().as_list()[1],
-			1))
-		w_o = tf.reshape(w_o, (
-			1, w_o.get_shape().as_list()[0],
-			w_o.get_shape().as_list()[1],
-			1))
+	w_i, w_j, w_f, w_o = tf.split(1, 4, outputs[0].W_xh)
+	w_o = tf.transpose(w_o)
+	print( w_o.get_shape().as_list())
+	w_o = tf.reshape(w_o, (
+		1, 28*FLAGS.size,
+		28,
+		1))
+	tf.image_summary("layer_w_o", w_o)
+	'''
+	w_j = tf.reshape(w_j, (
+		1, w_j.get_shape().as_list()[0],
+		w_j.get_shape().as_list()[1],
+		1))
+	w_f = tf.reshape(w_f, (
+		1, w_f.get_shape().as_list()[0],
+		w_f.get_shape().as_list()[1],
+		1))
+	w_o = tf.reshape(w_o, (
+		1, w_o.get_shape().as_list()[0],
+		w_o.get_shape().as_list()[1],
+		1))
 
-		tf.image_summary("layer_{}_w_i".format(k), w_i)
-		tf.image_summary("layer_{}_w_j".format(k), w_j)
-		tf.image_summary("layer_{}_w_f".format(k), w_f)
-		tf.image_summary("layer_{}_w_o".format(k), w_o)
+
+	tf.image_summary("layer_{}_w_j".format(k), w_j)
+	tf.image_summary("layer_{}_w_f".format(k), w_f)
+	tf.image_summary("layer_{}_w_o".format(k), w_o)
+	'''
+
 
 	merged = tf.merge_all_summaries()
 	return merged, train_step, cross_entropy, x, y_, training, accuracy, \
@@ -154,7 +168,8 @@ def train():
 		FLAGS.batch_size,
 		FLAGS.size,
 		FLAGS.n_layers,
-		FLAGS.clipping)
+		FLAGS.clipping,
+		FLAGS.tie_weights)
 
 	saver = tf.train.Saver(tf.all_variables())
 	sess = tf.Session()
@@ -192,7 +207,7 @@ def train():
 					x: batch_xs,
 					y_: batch_ys,
 					training: False,
-					keep_prob: FLAGS.dropout})
+					keep_prob: 1.0})
 			writer.add_summary(summary_str, i)
 			checkpoint_path = os.path.join("chkpnts/",
 				"lstmjam.ckpt")
@@ -207,7 +222,7 @@ def train():
 						x: test_data,
 						y_: test_label,
 						training: False,
-						keep_prob: FLAGS.dropout})
+						keep_prob: 1.0})
 				avg_acc += acc
 			# test_label = mnist.test.labels[
 			# :FLAGS.batch_size]
@@ -223,7 +238,8 @@ def test():
 		FLAGS.batch_size,
 		FLAGS.size,
 		FLAGS.n_layers,
-		FLAGS.clipping)
+		FLAGS.clipping,
+		FLAGS.tie_weights)
 
 	saver = tf.train.Saver(tf.all_variables())
 	sess = tf.Session()

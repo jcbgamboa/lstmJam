@@ -16,29 +16,37 @@ class BNLSTMCell(RNNCell):
     def output_size(self):
         return self.num_units
 
-    def __call__(self, x, state, keep_prob, id, scope=None, first=True):
+    def __call__(self, x, state, keep_prob, id, scope=None, first=True,
+                 tied_weights=None, tied_bias=None):
         c, h = state
 
         x_size = x.get_shape().as_list()[1]
 
-        self.W_xh = tf.get_variable('W_xh_{}'.format(id),
-            [x_size, 4 * self.num_units],
-            initializer=orthogonal_initializer())
-        self.W_hh = tf.get_variable('W_hh_{}'.format(id),
-            [self.num_units, 4 * self.num_units],
-            initializer=bn_lstm_identity_initializer(0.95))
-        bias = tf.get_variable('bias_{}'.format(id), [4 * self.num_units])
+	self.W_xh = tied_weights
+
+        if tied_weights is None:
+            self.W_xh = tf.get_variable('W_xh_{}'.format(id),
+                [x_size, 4 * self.num_units],
+		initializer=orthogonal_initializer())
+
+	self.bias = tied_bias
+
+	if tied_bias is None:
+        	self.bias = tf.get_variable('bias_{}'.format(id), [4 * self.num_units])
 
         xh = tf.matmul(x, self.W_xh)
         bn_xh = batch_norm(xh, 'xh_{}'.format(id), self.training)
 
         hh = None
         bn_hh = None
-        if not first:
+        if first:
+            self.W_hh = tf.get_variable('W_hh_{}'.format(id),
+                        [self.num_units, 4 * self.num_units],
+                        initializer=bn_lstm_identity_initializer(0.95))
             hh = tf.matmul(h, self.W_hh)
             bn_hh = batch_norm(hh, 'hh_{}'.format(id), self.training)
 
-        hidden = bn_xh + bias
+        hidden = bn_xh + self.bias
         if bn_hh is not None:
             hidden += bn_hh
 
@@ -51,7 +59,7 @@ class BNLSTMCell(RNNCell):
 
 	# Adds Dropout
         new_h = tf.nn.dropout(new_h, keep_prob)
-
+        self.hidden = hidden
         self.new_h = new_h
         self.state = (new_c, new_h)
         return new_h, (new_c, new_h)
