@@ -23,31 +23,31 @@ def exp1_30layers_10epochs_100statecells(FLAGS):
 	set_flags(FLAGS, 30, 10, 100, 1, False)
 
 def exp1_10layers_20epochs_100statecells(FLAGS):
-	set_flags(FLAGS, 10, 10, 100, 1, False)
+	set_flags(FLAGS, 10, 20, 100, 1, False)
 
 def exp1_20layers_20epochs_100statecells(FLAGS):
-	set_flags(FLAGS, 20, 10, 100, 1, False)
+	set_flags(FLAGS, 20, 20, 100, 1, False)
 
 def exp1_30layers_20epochs_100statecells(FLAGS):
-	set_flags(FLAGS, 30, 10, 100, 1, False)
+	set_flags(FLAGS, 30, 20, 100, 1, False)
 
 def exp1_10layers_10epochs_200statecells(FLAGS):
-	set_flags(FLAGS, 10, 10, 100, 1, False)
+	set_flags(FLAGS, 10, 10, 200, 1, False)
 
 def exp1_20layers_10epochs_200statecells(FLAGS):
-	set_flags(FLAGS, 20, 10, 100, 1, False)
+	set_flags(FLAGS, 20, 10, 200, 1, False)
 
 def exp1_30layers_10epochs_200statecells(FLAGS):
-	set_flags(FLAGS, 30, 10, 100, 1, False)
+	set_flags(FLAGS, 30, 10, 200, 1, False)
 
 def exp1_10layers_20epochs_200statecells(FLAGS):
-	set_flags(FLAGS, 10, 10, 100, 1, False)
+	set_flags(FLAGS, 10, 20, 200, 1, False)
 
 def exp1_20layers_20epochs_200statecells(FLAGS):
-	set_flags(FLAGS, 20, 10, 100, 1, False)
+	set_flags(FLAGS, 20, 20, 200, 1, False)
 
 def exp1_30layers_20epochs_200statecells(FLAGS):
-	set_flags(FLAGS, 30, 10, 100, 1, False)
+	set_flags(FLAGS, 30, 20, 200, 1, False)
 
 ################################################################### EXPERIMENT 2
 def exp2_10layers_10epochs_100statecells(FLAGS):
@@ -60,31 +60,31 @@ def exp2_30layers_10epochs_100statecells(FLAGS):
 	set_flags(FLAGS, 30, 10, 100, 0.5, False)
 
 def exp2_10layers_20epochs_100statecells(FLAGS):
-	set_flags(FLAGS, 10, 10, 100, 0.5, False)
+	set_flags(FLAGS, 10, 20, 100, 0.5, False)
 
 def exp2_20layers_20epochs_100statecells(FLAGS):
-	set_flags(FLAGS, 20, 10, 100, 0.5, False)
+	set_flags(FLAGS, 20, 20, 100, 0.5, False)
 
 def exp2_30layers_20epochs_100statecells(FLAGS):
-	set_flags(FLAGS, 30, 10, 100, 0.5, False)
+	set_flags(FLAGS, 30, 20, 100, 0.5, False)
 
 def exp2_10layers_10epochs_200statecells(FLAGS):
-	set_flags(FLAGS, 10, 10, 100, 0.5, False)
+	set_flags(FLAGS, 10, 10, 200, 0.5, False)
 
 def exp2_20layers_10epochs_200statecells(FLAGS):
-	set_flags(FLAGS, 20, 10, 100, 0.5, False)
+	set_flags(FLAGS, 20, 10, 200, 0.5, False)
 
 def exp2_30layers_10epochs_200statecells(FLAGS):
-	set_flags(FLAGS, 30, 10, 100, 0.5, False)
+	set_flags(FLAGS, 30, 10, 200, 0.5, False)
 
 def exp2_10layers_20epochs_200statecells(FLAGS):
-	set_flags(FLAGS, 10, 10, 100, 0.5, False)
+	set_flags(FLAGS, 10, 20, 200, 0.5, False)
 
 def exp2_20layers_20epochs_200statecells(FLAGS):
-	set_flags(FLAGS, 20, 10, 100, 0.5, False)
+	set_flags(FLAGS, 20, 20, 200, 0.5, False)
 
 def exp2_30layers_20epochs_200statecells(FLAGS):
-	set_flags(FLAGS, 30, 10, 100, 0.5, False)
+	set_flags(FLAGS, 30, 20, 200, 0.5, False)
 
 
 ################################################################### EXPERIMENT 3
@@ -98,31 +98,31 @@ def exp3_30layers_10epochs_100statecells(FLAGS):
 	set_flags(FLAGS, 30, 10, 100, 0.5, True)
 
 def exp3_10layers_20epochs_100statecells(FLAGS):
-	set_flags(FLAGS, 10, 10, 100, 0.5, True)
+	set_flags(FLAGS, 10, 20, 100, 0.5, True)
 
 def exp3_20layers_20epochs_100statecells(FLAGS):
-	set_flags(FLAGS, 20, 10, 100, 0.5, True)
+	set_flags(FLAGS, 20, 20, 100, 0.5, True)
 
 def exp3_30layers_20epochs_100statecells(FLAGS):
-	set_flags(FLAGS, 30, 10, 100, 0.5, True)
+	set_flags(FLAGS, 30, 20, 100, 0.5, True)
 
 def exp3_10layers_10epochs_200statecells(FLAGS):
-	set_flags(FLAGS, 10, 10, 100, 0.5, True)
+	set_flags(FLAGS, 10, 10, 200, 0.5, True)
 
 def exp3_20layers_10epochs_200statecells(FLAGS):
-	set_flags(FLAGS, 20, 10, 100, 0.5, True)
+	set_flags(FLAGS, 20, 10, 200, 0.5, True)
 
 def exp3_30layers_10epochs_200statecells(FLAGS):
-	set_flags(FLAGS, 30, 10, 100, 0.5, True)
+	set_flags(FLAGS, 30, 10, 200, 0.5, True)
 
 def exp3_10layers_20epochs_200statecells(FLAGS):
-	set_flags(FLAGS, 10, 10, 100, 0.5, True)
+	set_flags(FLAGS, 10, 20, 200, 0.5, True)
 
 def exp3_20layers_20epochs_200statecells(FLAGS):
-	set_flags(FLAGS, 20, 10, 100, 0.5, True)
+	set_flags(FLAGS, 20, 20, 200, 0.5, True)
 
 def exp3_30layers_20epochs_200statecells(FLAGS):
-	set_flags(FLAGS, 30, 10, 100, 0.5, True)
+	set_flags(FLAGS, 30, 20, 200, 0.5, True)
 
 
 ################################################################### EXPERIMENT 4
@@ -137,31 +137,31 @@ def exp4_30layers_10epochs_100statecells(FLAGS):
 	set_flags(FLAGS, 30, 10, 100, 1, True)
 
 def exp4_10layers_20epochs_100statecells(FLAGS):
-	set_flags(FLAGS, 10, 10, 100, 1, True)
+	set_flags(FLAGS, 10, 20, 100, 1, True)
 
 def exp4_20layers_20epochs_100statecells(FLAGS):
-	set_flags(FLAGS, 20, 10, 100, 1, True)
+	set_flags(FLAGS, 20, 20, 100, 1, True)
 
 def exp4_30layers_20epochs_100statecells(FLAGS):
-	set_flags(FLAGS, 30, 10, 100, 1, True)
+	set_flags(FLAGS, 30, 20, 100, 1, True)
 
 def exp4_10layers_10epochs_200statecells(FLAGS):
-	set_flags(FLAGS, 10, 10, 100, 1, True)
+	set_flags(FLAGS, 10, 10, 200, 1, True)
 
 def exp4_20layers_10epochs_200statecells(FLAGS):
-	set_flags(FLAGS, 20, 10, 100, 1, True)
+	set_flags(FLAGS, 20, 10, 200, 1, True)
 
 def exp4_30layers_10epochs_200statecells(FLAGS):
-	set_flags(FLAGS, 30, 10, 100, 1, True)
+	set_flags(FLAGS, 30, 10, 200, 1, True)
 
 def exp4_10layers_20epochs_200statecells(FLAGS):
-	set_flags(FLAGS, 10, 10, 100, 1, True)
+	set_flags(FLAGS, 10, 20, 200, 1, True)
 
 def exp4_20layers_20epochs_200statecells(FLAGS):
-	set_flags(FLAGS, 20, 10, 100, 1, True)
+	set_flags(FLAGS, 20, 20, 200, 1, True)
 
 def exp4_30layers_20epochs_200statecells(FLAGS):
-	set_flags(FLAGS, 30, 10, 100, 1, True)
+	set_flags(FLAGS, 30, 20, 200, 1, True)
 
 
 ################################################################## MAIN FUNCTION
