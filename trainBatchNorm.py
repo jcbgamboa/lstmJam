@@ -160,6 +160,40 @@ def load_model(saver, sess, chkpnts_dir):
 		print("Training with fresh parameters")
 		sess.run(tf.initialize_all_variables())
 
+def monitor_progress(FLAGS, sess, mnist, loss, merged, x, y_, training,
+			keep_prob, curr_iter, accuracy, writer, saver,
+			step_time, save_checkpoint = True):
+	batch_xs, batch_ys = mnist.validation.next_batch(
+			FLAGS.batch_size)
+	summary_str = sess.run(merged,
+		feed_dict={
+			x: batch_xs,
+			y_: batch_ys,
+			training: False,
+			keep_prob: 1.0})
+	writer.add_summary(summary_str, curr_iter)
+	checkpoint_path = os.path.join("chkpnts/",
+		"lstmjam.ckpt")
+
+	if save_checkpoint:
+		saver.save(sess, checkpoint_path, global_step = curr_iter)
+
+	print(loss, step_time, curr_iter, mnist.train.epochs_completed)
+	avg_acc = 0.0
+	for test_itr in range(70):
+		test_data, test_label = mnist.test.next_batch(
+			FLAGS.batch_size)
+		acc = sess.run(accuracy,
+			feed_dict={
+				x: test_data,
+				y_: test_label,
+				training: False,
+				keep_prob: 1.0})
+		avg_acc += acc
+	# test_label = mnist.test.labels[
+	# :FLAGS.batch_size]
+	print("Testing Accuracy:" + str(avg_acc / 70))
+
 
 def train():
 	mnist = data_prep()
@@ -203,63 +237,14 @@ def train():
 		step_time = time.time() - current_time
 		current_time = time.time()
 		if curr_iter % FLAGS.steps_per_checkpoint == 0:
-			batch_xs, batch_ys = mnist.validation.next_batch(
-				FLAGS.batch_size)
-			summary_str = sess.run(merged,
-				feed_dict={
-					x: batch_xs,
-					y_: batch_ys,
-					training: False,
-					keep_prob: 1.0})
-			writer.add_summary(summary_str, curr_iter)
-			checkpoint_path = os.path.join("chkpnts/",
-				"lstmjam.ckpt")
-			saver.save(sess, checkpoint_path, global_step = curr_iter)
-			print(loss, step_time, curr_iter, mnist.train.epochs_completed)
-			avg_acc = 0.0
-			for test_itr in range(70):
-				test_data, test_label = mnist.test.next_batch(
-					FLAGS.batch_size)
-				acc = sess.run(accuracy,
-					feed_dict={
-						x: test_data,
-						y_: test_label,
-						training: False,
-						keep_prob: 1.0})
-				avg_acc += acc
-			# test_label = mnist.test.labels[
-			# :FLAGS.batch_size]
-			print("Testing Accuracy:" + str(avg_acc / 70))
+			monitor_progress(FLAGS, sess, mnist, loss, merged, x, y_,
+					training, keep_prob, curr_iter, accuracy,
+					writer, saver, step_time, True)
 
 		if (mnist.train.epochs_completed >= FLAGS.n_epochs):
-			# TODO: CLEAN THIS TERRIBLE CODE REPETITION
-			batch_xs, batch_ys = mnist.validation.next_batch(
-				FLAGS.batch_size)
-			summary_str = sess.run(merged,
-				feed_dict={
-					x: batch_xs,
-					y_: batch_ys,
-					training: False,
-					keep_prob: 1.0})
-			writer.add_summary(summary_str, curr_iter)
-			checkpoint_path = os.path.join("chkpnts/",
-				"lstmjam.ckpt")
-			saver.save(sess, checkpoint_path, global_step = curr_iter)
-			print(loss, step_time, curr_iter, mnist.train.epochs_completed)
-			avg_acc = 0.0
-			for test_itr in range(70):
-				test_data, test_label = mnist.test.next_batch(
-					FLAGS.batch_size)
-				acc = sess.run(accuracy,
-					feed_dict={
-						x: test_data,
-						y_: test_label,
-						training: False,
-						keep_prob: 1.0})
-				avg_acc += acc
-			# test_label = mnist.test.labels[
-			# :FLAGS.batch_size]
-			print("Testing Accuracy:" + str(avg_acc / 70))
+			monitor_progress(FLAGS, sess, mnist, loss, merged, x, y_,
+					training, keep_prob, curr_iter, accuracy,
+					writer, saver, step_time, True)
 			break
 		curr_iter += 1
 
