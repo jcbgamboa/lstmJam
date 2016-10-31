@@ -115,13 +115,13 @@ def create_model(input_size, output_size,
 
 
 	w_i, w_j, w_f, w_o = tf.split(1, 4, outputs[0].W_xh)
-	w_o = tf.transpose(w_o)
-	print( w_o.get_shape().as_list())
-	w_o = tf.reshape(w_o, (
+	w_i = tf.transpose(w_i)
+	print( w_i.get_shape().as_list())
+	w_i = tf.reshape(w_i, (
 		1, 28*FLAGS.size,
 		28,
 		1))
-	tf.image_summary("layer_w_o", w_o)
+	tf.image_summary("layer_w_o", w_i)
 	'''
 	w_j = tf.reshape(w_j, (
 		1, w_j.get_shape().as_list()[0],
