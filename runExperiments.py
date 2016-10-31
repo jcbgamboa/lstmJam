@@ -180,11 +180,13 @@ tf.app.flags.DEFINE_string("run_experiments", '',
 def main(_):
 	experiments = get_experiments(FLAGS.run_experiments)
 
-	print(experiments)
 	for e in experiments:
 		e(FLAGS)
-		trainBatchNorm.train()
-
+		print(("n_layers: {}, n_epochs: {}, size: {}, " +
+			"dropout: {}, tie: {}").format(
+				FLAGS.n_layers, FLAGS.n_epochs, FLAGS.size,
+				FLAGS.dropout, FLAGS.tie_weights))
+		trainBatchNorm.train(False)
 
 if __name__ == '__main__':
 	tf.app.run()

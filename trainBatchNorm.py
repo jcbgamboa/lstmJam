@@ -162,7 +162,7 @@ def load_model(saver, sess, chkpnts_dir):
 
 def monitor_progress(FLAGS, sess, mnist, loss, merged, x, y_, training,
 			keep_prob, curr_iter, accuracy, writer, saver,
-			step_time, save_checkpoint = True):
+			step_time, save_checkpoints = True):
 	batch_xs, batch_ys = mnist.validation.next_batch(
 			FLAGS.batch_size)
 	summary_str = sess.run(merged,
@@ -175,7 +175,7 @@ def monitor_progress(FLAGS, sess, mnist, loss, merged, x, y_, training,
 	checkpoint_path = os.path.join("chkpnts/",
 		"lstmjam.ckpt")
 
-	if save_checkpoint:
+	if save_checkpoints:
 		saver.save(sess, checkpoint_path, global_step = curr_iter)
 
 	print(loss, step_time, curr_iter, mnist.train.epochs_completed)
@@ -195,7 +195,7 @@ def monitor_progress(FLAGS, sess, mnist, loss, merged, x, y_, training,
 	print("Testing Accuracy:" + str(avg_acc / 70))
 
 
-def train():
+def train(save_checkpoints = True):
 	mnist = data_prep()
 
 	merged, train_step, cross_entropy, x, y_, \
@@ -238,13 +238,13 @@ def train():
 		current_time = time.time()
 		if curr_iter % FLAGS.steps_per_checkpoint == 0:
 			monitor_progress(FLAGS, sess, mnist, loss, merged, x, y_,
-					training, keep_prob, curr_iter, accuracy,
-					writer, saver, step_time, True)
+				training, keep_prob, curr_iter, accuracy,
+				writer, saver, step_time, save_checkpoints)
 
 		if (mnist.train.epochs_completed >= FLAGS.n_epochs):
 			monitor_progress(FLAGS, sess, mnist, loss, merged, x, y_,
-					training, keep_prob, curr_iter, accuracy,
-					writer, saver, step_time, True)
+				training, keep_prob, curr_iter, accuracy,
+				writer, saver, step_time, save_checkpoints)
 			break
 		curr_iter += 1
 
