@@ -98,6 +98,38 @@ We have tested the code in the following two environments:
 * Compare others just to see what is the difference (Extra)
 * Compare classification results with other models
 
+# Visualizations
+
+### Accuracy
+![Accuracy](https://sigvoiced.files.wordpress.com/2016/12/acc.png)
+
+### Loss
+![Loss](https://sigvoiced.files.wordpress.com/2016/12/loss.png)
+
+### Features 1st layer
+![Features 1st layer](https://sigvoiced.files.wordpress.com/2016/12/f_1.png)
+
+### Features 1st layer 2nd
+![Features 1st layer](https://sigvoiced.files.wordpress.com/2016/12/f_1_2.png)
+
+### Weights l_1
+![W_l_1](https://sigvoiced.files.wordpress.com/2016/12/w_1.png)
+
+### Grad l_1
+![g_l_1](https://sigvoiced.files.wordpress.com/2016/12/grd_l1.png)
+
+### Grad l_9
+![g_l_9](https://sigvoiced.files.wordpress.com/2016/12/grd_9.png)
+
+### Grad_l_8
+![g_l_8](https://sigvoiced.files.wordpress.com/2016/12/grd_8.png)
+
+### Grad_l_1_single
+![g_l_1_1](https://sigvoiced.files.wordpress.com/2016/12/grad_1.png)
+
+
+
+
 
 # TO DO
 
