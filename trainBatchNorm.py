@@ -23,8 +23,10 @@ tf.app.flags.DEFINE_boolean("train", True,
 	"Run a train if this is set to True.")
 tf.app.flags.DEFINE_boolean("tie_weights", False,
 	"Use the same weights in all layers if set true.")
-tf.app.flags.DEFINE_integer("n_itr", 100000,
-	"Number of training iterations.")
+tf.app.flags.DEFINE_integer("n_epochs", 3,
+	"Number of epochs to run the training procedure.")
+#tf.app.flags.DEFINE_integer("n_itr", 100000,
+#	"Number of training iterations.")
 tf.app.flags.DEFINE_string("log_dir", "/tmp",
 	"Tensorboard log directory.")
 tf.app.flags.DEFINE_string("data_dir", "/tmp",
@@ -158,8 +160,42 @@ def load_model(saver, sess, chkpnts_dir):
 		print("Training with fresh parameters")
 		sess.run(tf.initialize_all_variables())
 
+def monitor_progress(FLAGS, sess, mnist, loss, merged, x, y_, training,
+			keep_prob, curr_iter, accuracy, writer, saver,
+			step_time, save_checkpoints = True):
+	batch_xs, batch_ys = mnist.validation.next_batch(
+			FLAGS.batch_size)
+	summary_str = sess.run(merged,
+		feed_dict={
+			x: batch_xs,
+			y_: batch_ys,
+			training: False,
+			keep_prob: 1.0})
+	writer.add_summary(summary_str, curr_iter)
+	checkpoint_path = os.path.join("chkpnts/",
+		"lstmjam.ckpt")
 
-def train():
+	if save_checkpoints:
+		saver.save(sess, checkpoint_path, global_step = curr_iter)
+
+	print(loss, step_time, curr_iter, mnist.train.epochs_completed)
+	avg_acc = 0.0
+	for test_itr in range(70):
+		test_data, test_label = mnist.test.next_batch(
+			FLAGS.batch_size)
+		acc = sess.run(accuracy,
+			feed_dict={
+				x: test_data,
+				y_: test_label,
+				training: False,
+				keep_prob: 1.0})
+		avg_acc += acc
+	# test_label = mnist.test.labels[
+	# :FLAGS.batch_size]
+	print("Testing Accuracy:" + str(avg_acc / 70))
+
+
+def train(save_checkpoints = True):
 	mnist = data_prep()
 
 	merged, train_step, cross_entropy, x, y_, \
@@ -190,7 +226,8 @@ def train():
 		"Using population statistics (training: False) at test time gives "
 		"worse results than batch statistics")
 
-	for i in range(FLAGS.n_itr):
+	curr_iter = 0
+	while True:
 		batch_xs, batch_ys = mnist.train.next_batch(FLAGS.batch_size)
 		loss, _ = sess.run([cross_entropy, train_step],
 			feed_dict={
@@ -199,34 +236,17 @@ def train():
 				keep_prob: FLAGS.dropout})
 		step_time = time.time() - current_time
 		current_time = time.time()
-		if i % FLAGS.steps_per_checkpoint == 0:
-			batch_xs, batch_ys = mnist.validation.next_batch(
-				FLAGS.batch_size)
-			summary_str = sess.run(merged,
-				feed_dict={
-					x: batch_xs,
-					y_: batch_ys,
-					training: False,
-					keep_prob: 1.0})
-			writer.add_summary(summary_str, i)
-			checkpoint_path = os.path.join("chkpnts/",
-				"lstmjam.ckpt")
-			saver.save(sess, checkpoint_path, global_step=i)
-			print(loss, step_time, i)
-			avg_acc = 0.0
-			for test_itr in range(70):
-				test_data, test_label = mnist.test.next_batch(
-					FLAGS.batch_size)
-				acc = sess.run(accuracy,
-					feed_dict={
-						x: test_data,
-						y_: test_label,
-						training: False,
-						keep_prob: 1.0})
-				avg_acc += acc
-			# test_label = mnist.test.labels[
-			# :FLAGS.batch_size]
-			print("Testing Accuracy:" + str(avg_acc / 70))
+		if curr_iter % FLAGS.steps_per_checkpoint == 0:
+			monitor_progress(FLAGS, sess, mnist, loss, merged, x, y_,
+				training, keep_prob, curr_iter, accuracy,
+				writer, saver, step_time, save_checkpoints)
+
+		if (mnist.train.epochs_completed >= FLAGS.n_epochs):
+			monitor_progress(FLAGS, sess, mnist, loss, merged, x, y_,
+				training, keep_prob, curr_iter, accuracy,
+				writer, saver, step_time, save_checkpoints)
+			break
+		curr_iter += 1
 
 
 def test():
