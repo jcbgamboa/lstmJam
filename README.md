@@ -30,42 +30,124 @@ or Sparsity models?
 
 We have tested the code in the following two environments:
 
-* Python 3.4
-* TensorFlow 0.9.0
-
-[get the info about the other environment]
+* Python 2.7 / 3.4
+* TensorFlow 0.10.0
 
 # Experiments
-
-[this is a simple format for describing the experiments]
 
 ## MNIST dataset
 
 ### Experiment 1
 
-* Number of layers:
-* Use tied weights:
-* Use batch normalization:
-* Type of weight initialization:
-* How-many-folds cross-validation:
-* Size of state cell:
-* Size of output cell: (can this be different from the size of the
-	state cell?)
+* Number of layers: \[10, 20, 30\]
+* Number of epochs: 10/20
+* Dropout: NO
+* Use tied weights: NO
+* Use batch normalization: YES
+* Type of weight initialization: Orthogonal
+* How-many-folds cross-validation: NO
+* Size of state cell: \[100, 200, 300\]
 
 ### Experiment 2
+
+* Number of layers: \[10, 20, 30\]
+* Number of epochs: 10/20
+* Dropout: YES
+* Use tied weights: NO
+* Use batch normalization: YES
+* Type of weight initialization: Orthogonal
+* How-many-folds cross-validation: NO
+* Size of state cell: \[100, 200, 300\]
+
+### Experiment 3
+
+* Number of layers: \[10, 20, 30\]
+* Number of epochs: 10/20
+* Dropout: YES
+* Use tied weights: YES
+* Use batch normalization: YES
+* Type of weight initialization: Orthogonal
+* How-many-folds cross-validation: NO
+* Size of state cell: \[100, 200, 300\]
+
+### Experiment 4
+
+* Number of layers: \[10, 20, 30\]
+* Number of epochs: 10/20
+* Dropout: NO
+* Use tied weights: YES
+* Use batch normalization: YES
+* Type of weight initialization: Orthogonal
+* How-many-folds cross-validation: NO
+* Size of state cell: \[100, 200, 300\]
+
+# Results and comparisons
+
+## Results
+
+* Accuracy curve over validation set
+* Average accuracy over the entire test set
+* Loss curve
+* Gradient change over all the parameters
+* Images of the batches (Gabor filters?)
+
+## Comparisons
+
+* Compare gradient change with an MLP
+* Compare our filters with CNN filters
+* Compare others just to see what is the difference (Extra)
+* Compare classification results with other models
+
+# Visualizations
+
+### Accuracy
+![Accuracy](https://sigvoiced.files.wordpress.com/2016/12/acc.png)
+
+### Loss
+![Loss](https://sigvoiced.files.wordpress.com/2016/12/loss.png)
+
+### Features 1st layer
+![Features 1st layer](https://sigvoiced.files.wordpress.com/2016/12/f_1.png)
+
+### Features 1st layer 2nd
+![Features 1st layer](https://sigvoiced.files.wordpress.com/2016/12/f_1_2.png)
+
+### Weights l_1
+![W_l_1](https://sigvoiced.files.wordpress.com/2016/12/w_1.png)
+
+### Grad l_1
+![g_l_1](https://sigvoiced.files.wordpress.com/2016/12/grd_l1.png)
+
+### Grad l_9
+![g_l_9](https://sigvoiced.files.wordpress.com/2016/12/grd_9.png)
+
+### Grad_l_8
+![g_l_8](https://sigvoiced.files.wordpress.com/2016/12/grd_8.png)
+
+### Grad_l_1_single
+![g_l_1_1](https://sigvoiced.files.wordpress.com/2016/12/grad_1.png)
+
+
+
 
 
 # TO DO
 
-* Prepare framework for running the experiments automagically
+* Fix visualizations for filters in the for of \[BATCH_SIZE X 28 X 28 X 1\]
+    * Remove the present Image Summary
+    
+* Load a bigger dataset
+
+* Create a comparable CNN to compare the filters in the lower layers and the gradient change over time.
+
+* Allow for any batch size
+
+* Tie weights (problem: size of the bottom-most layer is different)
 
 * Change the Weight initializations
 	* Use Normal() [i.e., Gaussian] instead and check results
 
 * Do cross-validation
 
-* Try Drop-Out (we believe this network is likely to overfit,
-	especially when "tied weights" are not used)
-
-* Tie weights (problem: size of the bottom-most layer is different)
+* Prepare framework for running the experiments automagically
 

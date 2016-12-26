@@ -1,0 +1,7 @@
+MNIST_data
+__pycache__
+chkpnts
+logs
+.idea
+*.pyc
+docs
